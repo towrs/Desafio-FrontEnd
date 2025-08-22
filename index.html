@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitoramento de Sistemas</title>
+ 
+ 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+ 
+  <style>
+    body { padding-top: 56px; }
+    .sidebar {
+      min-height: calc(100vh - 56px);
+    }
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+    .table-alerts tbody tr td { vertical-align: middle; }
+    @media (max-width: 767.98px) {
+      .sidebar { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+      <button class="btn btn-outline-light me-2 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Alternar menu">
+        <i class="bi bi-list"></i>
+      </button>
+      <a class="navbar-brand fw-semibold" href="#dashboard">
+        <i class="bi bi-speedometer2 me-2"></i>Monitoramento de Sistemas
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav" aria-controls="topNav" aria-expanded="false" aria-label="Alternar navegação">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="topNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#servidores">Servidores</a></li>
+          <li class="nav-item"><a class="nav-link" href="#alertas">Alertas</a></li>
+          <li class="nav-item"><a class="nav-link" href="#configuracoes">Configurações</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+ 
+  <div class="container-fluid">
+    <div class="row g-0">
+      <nav id="sidebarMenu" class="col-12 col-lg-2 collapse d-lg-block bg-light sidebar border-end">
+        <div class="p-3">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-hdd-network me-2"></i>
+            <span class="fw-semibold">Menu</span>
+          </div>
+          <div class="list-group list-group-flush">
+            <a href="#dashboard" class="list-group-item list-group-item-action d-flex align-items-center">
+              <i class="bi bi-grid me-2"></i> Dashboard
+            </a>
+            <a href="#servidores" class="list-group-item list-group-item-action d-flex align-items-center">
+              <i class="bi bi-server me-2"></i> Servidores
+            </a>
+            <a href="#alertas" class="list-group-item list-group-item-action d-flex align-items-center">
+              <i class="bi bi-bell me-2"></i> Alertas
+            </a>
+            <a href="#configuracoes" class="list-group-item list-group-item-action d-flex align-items-center">
+              <i class="bi bi-gear me-2"></i> Configurações
+            </a>
+          </div>
+          <hr>
+          <div class="small text-muted">
+            <i class="bi bi-info-circle me-1"></i> Versão demo
+          </div>
+        </div>
+      </nav>
+ 
+      <main class="col-12 col-lg-10 px-3 px-md-4">
+        <section id="dashboard" class="py-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Dashboard</h2>
+            <div class="d-flex gap-2">
+              <button id="btnAtualizar" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-arrow-repeat me-1"></i>Atualizar agora
+              </button>
+              <button id="btnPausar" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-pause-circle me-1"></i>Pausar
+              </button>
+            </div>
+          </div>
+ 
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="h6 mb-0">Uso de CPU</h3>
+                    <span class="badge text-bg-secondary">Últimos 5 min</span>
+                  </div>
+                  <div class="metric-value" id="cpuValue">65%</div>
+                  <div class="progress my-2" role="progressbar" aria-label="Uso de CPU" aria-valuemin="0" aria-valuemax="100">
+                    <div id="cpuBar" class="progress-bar bg-info" style="width: 65%"></div>
+                  </div>
+                  <button class="btn btn-sm btn-outline-dark">
+                    <i class="bi bi-activity me-1"></i>Detalhes
+                  </button>
+                </div>
+              </div>
+            </div>
+ 
+            <div class="col-12 col-md-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="h6 mb-0">Uso de Memória</h3>
+                    <span class="badge text-bg-secondary">Total 8 GB</span>
+                  </div>
+                  <div class="metric-value">
+                    <span id="memValue">4.0</span> GB / 8 GB
+                  </div>
+                  <div class="progress my-2" role="progressbar" aria-label="Uso de Memória" aria-valuemin="0" aria-valuemax="100">
+                    <div id="memBar" class="progress-bar bg-success" style="width: 50%"></div>
+                  </div>
+                  <button class="btn btn-sm btn-outline-dark">
+                    <i class="bi bi-speedometer me-1"></i>Detalhes
+                  </button>
+                </div>
+              </div>
+            </div>
+ 
+            <div class="col-12 col-md-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="h6 mb-0">Espaço em Disco</h3>
+                    <span class="badge text-bg-secondary">Total 600 GB</span>
+                  </div>
+                  <div class="metric-value">
+                    <span id="diskValue">500</span> GB / 600 GB
+                  </div>
+                  <div class="progress my-2" role="progressbar" aria-label="Uso de Disco" aria-valuemin="0" aria-valuemax="100">
+                    <div id="diskBar" class="progress-bar bg-warning" style="width: 50%"></div>
+                  </div>
+                  <button class="btn btn-sm btn-outline-dark">
+                    <i class="bi bi-hdd me-1"></i>Detalhes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+ 
+          <div class="row g-3 mt-1">
+            <div class="col-12 col-xl-6">
+              <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold"><i class="bi bi-graph-up-arrow me-2"></i>Consumo de CPU (5 min)</span>
+                  <span class="badge text-bg-light text-muted">Linha</span>
+                </div>
+                <div class="card-body">
+                  <canvas id="cpuChart" height="120"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-6">
+              <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold"><i class="bi bi-diagram-3 me-2"></i>Tráfego de Rede</span>
+                  <span class="badge text-bg-light text-muted">Mbps</span>
+                </div>
+                <div class="card-body">
+                  <canvas id="netChart" height="120"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+ 
+        <hr class="my-4">
+ 
+        <section id="servidores" class="py-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Servidores</h2>
+            <button class="btn btn-sm btn-primary"><i class="bi bi-plus-circle me-1"></i>Novo servidor</button>
+          </div>
+ 
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Servidor</th>
+                  <th>IP</th>
+                  <th>Local</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="serversTableBody">
+                <tr>
+                  <td>app-01</td>
+                  <td>10.0.0.11</td>
+                  <td>SP</td>
+                  <td><span class="badge text-bg-success">Online</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-power"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>app-02</td>
+                  <td>10.0.0.12</td>
+                  <td>SP</td>
+                  <td><span class="badge text-bg-success">Online</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-power"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>db-01</td>
+                  <td>10.0.0.21</td>
+                  <td>RJ</td>
+                  <td><span class="badge text-bg-secondary">Offline</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-power"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>web-01</td>
+                  <td>10.0.0.31</td>
+                  <td>MG</td>
+                  <td><span class="badge text-bg-success">Online</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-power"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+ 
+        <hr class="my-4">
+ 
+        <section id="alertas" class="py-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Últimos alertas</h2>
+            <div class="d-flex gap-2">
+              <button id="btnLimparAlertas" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-trash me-1"></i>Limpar
+              </button>
+              <button class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-funnel me-1"></i>Filtrar
+              </button>
+            </div>
+          </div>
+ 
+          <div class="table-responsive">
+            <table class="table table-hover table-alerts">
+              <thead class="table-light">
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Servidor</th>
+                  <th>Mensagem</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="alertsTableBody">
+                <tr>
+                  <td>19/08/2025 17:20</td>
+                  <td>app-01</td>
+                  <td>CPU acima de 90%</td>
+                  <td><span class="badge text-bg-danger">Crítico</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-success"><i class="bi bi-check2-circle me-1"></i>Reconhecer</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>19/08/2025 17:15</td>
+                  <td>web-01</td>
+                  <td>Latência de rede elevada</td>
+                  <td><span class="badge text-bg-warning">Alerta</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-success"><i class="bi bi-check2-circle me-1"></i>Reconhecer</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>19/08/2025 17:10</td>
+                  <td>db-01</td>
+                  <td>Servidor indisponível</td>
+                  <td><span class="badge text-bg-danger">Crítico</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-success"><i class="bi bi-check2-circle me-1"></i>Reconhecer</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+ 
+        <hr class="my-4">
+        <section id="configuracoes" class="py-3 mb-5">
+          <h2 class="h4 mb-3">Configurações</h2>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h3 class="h6">Atualização automática</h3>
+                  <div class="form-check form-switch my-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="autoUpdateSwitch" checked>
+                    <label class="form-check-label" for="autoUpdateSwitch">Habilitar</label>
+                  </div>
+                  <label for="intervalo" class="form-label">Intervalo (segundos)</label>
+                  <input type="number" id="intervalo" class="form-control" min="3" max="60" step="1" value="5">
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h3 class="h6">Preferências</h3>
+                  <div class="mb-2">
+                    <label class="form-label">Tema</label>
+                    <select class="form-select" id="themeSelect">
+                      <option value="auto" selected>Automático</option>
+                      <option value="light">Claro</option>
+                      <option value="dark">Escuro</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-sm btn-primary"><i class="bi bi-save me-1"></i>Salvar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+ 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+ 
+  <script>
+    const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const rndFloat = (min, max, d = 1) => (Math.random() * (max - min) + min).toFixed(d);
+    const pad = (n) => n.toString().padStart(2, '0');
+    const nowString = () => {
+      const d = new Date();
+      return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    };
+ 
+    const cpuValueEl = document.getElementById('cpuValue');
+    const cpuBarEl   = document.getElementById('cpuBar');
+    const memValueEl = document.getElementById('memValue');
+    const memBarEl   = document.getElementById('memBar');
+    const diskValueEl= document.getElementById('diskValue');
+    const diskBarEl  = document.getElementById('diskBar');
+ 
+    const cpuCtx = document.getElementById('cpuChart');
+    const netCtx = document.getElementById('netChart');
+ 
+    const initialLabels = (() => {
+      const arr = [];
+      const now = Date.now();
+      for (let i = 9; i >= 0; i--) {
+        const t = new Date(now - i * 30 * 1000);
+        arr.push(pad(t.getHours()) + ':' + pad(t.getMinutes()) + ':' + pad(t.getSeconds()));
+      }
+      return arr;
+    })();
+ 
+    const cpuData = initialLabels.map(() => rnd(25, 85));
+    const netData = initialLabels.map(() => rnd(50, 400)); // Mbps
+ 
+    const cpuChart = new Chart(cpuCtx, {
+      type: 'line',
+      data: {
+        labels: initialLabels,
+        datasets: [{
+          label: 'CPU (%)',
+          data: cpuData,
+          borderColor: 'rgba(13,110,253,0.9)',
+          backgroundColor: 'rgba(13,110,253,0.15)',
+          tension: 0.35,
+          fill: true,
+          pointRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 0, max: 100, ticks: { stepSize: 20 } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+ 
+    const netChart = new Chart(netCtx, {
+      type: 'line',
+      data: {
+        labels: initialLabels,
+        datasets: [{
+          label: 'Tráfego (Mbps)',
+          data: netData,
+          borderColor: 'rgba(25,135,84,0.9)',
+          backgroundColor: 'rgba(25,135,84,0.15)',
+          tension: 0.35,
+          fill: true,
+          pointRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+ 
+    let intervalMs = 5000;
+    let timer = null;
+    const autoSwitch = document.getElementById('autoUpdateSwitch');
+    const intervalInput = document.getElementById('intervalo');
+ 
+    function colorByUsage(v) {
+      if (v >= 85) return 'bg-danger';
+      if (v >= 65) return 'bg-warning';
+      if (v >= 40) return 'bg-info';
+      return 'bg-success';
+    }
+ 
+    function updateMetrics() {
+      const cpu = rnd(20, 95);
+      cpuValueEl.textContent = cpu + '%';
+      cpuBarEl.style.width = cpu + '%';
+      cpuBarEl.className = 'progress-bar ' + colorByUsage(cpu);
+ 
+      const memUsed = parseFloat(rndFloat(3, 7, 1));
+      const memPct = Math.round((memUsed / 8) * 100);
+      memValueEl.textContent = memUsed.toFixed(1);
+      memBarEl.style.width = memPct + '%';
+      memBarEl.className = 'progress-bar ' + colorByUsage(memPct);
+ 
+      const diskUsed = rnd(150, 450);
+      const diskPct = Math.round((diskUsed / 500) * 100);
+      diskValueEl.textContent = diskUsed;
+      diskBarEl.style.width = diskPct + '%';
+      diskBarEl.className = 'progress-bar ' + colorByUsage(diskPct);
+ 
+      const t = new Date();
+      const label = pad(t.getHours()) + ':' + pad(t.getMinutes()) + ':' + pad(t.getSeconds());
+ 
+      cpuChart.data.labels.push(label);
+      cpuChart.data.datasets[0].data.push(cpu);
+      if (cpuChart.data.labels.length > 10) {
+        cpuChart.data.labels.shift();
+        cpuChart.data.datasets[0].data.shift();
+      }
+      cpuChart.update('none');
+ 
+      const net = rnd(40, 450);
+      netChart.data.labels.push(label);
+      netChart.data.datasets[0].data.push(net);
+      if (netChart.data.labels.length > 10) {
+        netChart.data.labels.shift();
+        netChart.data.datasets[0].data.shift();
+      }
+      netChart.update('none');
+ 
+      randomizeServerStatus();
+      if (Math.random() < 0.45) addRandomAlert();
+    }
+ 
+    function randomizeServerStatus() {
+      const rows = document.querySelectorAll('#serversTableBody tr');
+      rows.forEach((row) => {
+        if (Math.random() < 0.08) {
+          const statusCell = row.children[3];
+          const isOnline = statusCell.textContent.trim().toLowerCase() === 'online';
+          if (isOnline) {
+            statusCell.innerHTML = '<span class="badge text-bg-secondary">Offline</span>';
+          } else {
+            statusCell.innerHTML = '<span class="badge text-bg-success">Online</span>';
+          }
+        }
+      });
+    }
+ 
+    const alertsBody = document.getElementById('alertsTableBody');
+    const messages = [
+      'CPU acima de 90%',
+      'Latência de rede elevada',
+      'Erro de autenticação',
+      'Memória próxima do limite',
+      'Disco acima de 85%',
+      'Perda de pacote detectada',
+      'Serviço não respondeu ao healthcheck'
+    ];
+    const serverNames = ['app-01', 'app-02', 'db-01', 'web-01'];
+ 
+    function addRandomAlert() {
+      const dt = nowString();
+      const server = serverNames[rnd(0, serverNames.length - 1)];
+      const msg = messages[rnd(0, messages.length - 1)];
+      const critical = Math.random() < 0.4; 
+      const badge = critical
+        ? '<span class="badge text-bg-danger">Crítico</span>'
+        : '<span class="badge text-bg-warning">Alerta</span>';
+ 
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${dt}</td>
+        <td>${server}</td>
+        <td>${msg}</td>
+        <td>${badge}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-success"><i class="bi bi-check2-circle me-1"></i>Reconhecer</button>
+        </td>
+      `;
+      alertsBody.prepend(tr);
+ 
+      const rows = alertsBody.querySelectorAll('tr');
+      if (rows.length > 12) {
+        alertsBody.removeChild(rows[rows.length - 1]);
+      }
+    }
+ 
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(updateMetrics, intervalMs);
+    }
+ 
+    document.getElementById('btnAtualizar').addEventListener('click', updateMetrics);
+    document.getElementById('btnPausar').addEventListener('click', function () {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+        this.innerHTML = '<i class="bi bi-play-circle me-1"></i>Retomar';
+        this.classList.remove('btn-outline-secondary');
+        this.classList.add('btn-outline-success');
+      } else {
+        startTimer();
+        this.innerHTML = '<i class="bi bi-pause-circle me-1"></i>Pausar';
+        this.classList.remove('btn-outline-success');
+        this.classList.add('btn-outline-secondary');
+      }
+    });
+ 
+    autoSwitch.addEventListener('change', () => {
+      if (autoSwitch.checked) startTimer(); else { clearInterval(timer); timer = null; }
+    });
+ 
+    intervalInput.addEventListener('change', () => {
+      const v = Math.max(3, Math.min(60, parseInt(intervalInput.value || '5', 10)));
+      intervalInput.value = v;
+      intervalMs = v * 1000;
+      if (autoSwitch.checked) startTimer();
+    });
+ 
+    document.getElementById('btnLimparAlertas').addEventListener('click', () => {
+      alertsBody.innerHTML = '';
+    });
+ 
+    const themeSelect = document.getElementById('themeSelect');
+    themeSelect.addEventListener('change', () => {
+      const v = themeSelect.value;
+      if (v === 'dark') document.documentElement.setAttribute('data-bs-theme', 'dark');
+      else if (v === 'light') document.documentElement.setAttribute('data-bs-theme', 'light');
+      else document.documentElement.removeAttribute('data-bs-theme');
+    });
+ 
+    updateMetrics();
+    startTimer();
+  </script>
+</body>
+</html>
+ 
+ 
